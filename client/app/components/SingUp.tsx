@@ -35,7 +35,7 @@ export default function SignupForm() {
     //     resolve();
     //   }, 2000); // Simulating a delay, replace with actual registration logic
     // });
-    // router.push("/login"); // Redirect to login page after successful signup
+    router.push("/login"); // Redirect to login page after successful signup
   }
 
   return (
@@ -60,12 +60,13 @@ export default function SignupForm() {
 
             {/* Form Body */}
             <div className="rounded-tr-4xl bg-white px-10 pb-8 pt-4">
-              <h1 className="text-2xl font-semibold text-gray-900">Sign Up</h1>
+              <h1 className="text-2xl font-semibold text-gray-900">Create your account</h1>
               <form
                 className="mt-12"
                 action=""
                 method="POST"
                 onSubmit={handleSubmit(onSubmit)}
+                data-testid="form"
               >
                 {/* Name Input */}
                 <div className="relative">
@@ -194,6 +195,7 @@ export default function SignupForm() {
                 {/* Submit Button */}
                 <button
                   type="submit"
+                  data-testid="submit-btn"
                   disabled={!isDirty || !isValid || isSubmitting}
                   className="mt-8 block w-full cursor-pointer rounded bg-rose-500 px-4 py-2 text-center font-semibold text-white hover:bg-rose-400 focus:outline-none focus:ring focus:ring-rose-500 focus:ring-opacity-80 focus:ring-offset-2 disabled:opacity-70"
                 >
@@ -220,7 +222,7 @@ export default function SignupForm() {
                 </span>
                 <Link
                   className="block text-center text-sm font-medium text-rose-600 underline hover:bg-rose-100 px-2 py-0.5 rounded hover:underline focus:outline-none focus:ring-2 focus:ring-rose-500"
-                  href="/login"
+                  href="/"
                 >
                   Login
                 </Link>
