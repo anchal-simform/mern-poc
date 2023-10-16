@@ -44,7 +44,7 @@ export default function Products({ productsList }) {
             <path d="M1 1h4l3.7 13.6a2 2 0 0 0 1.9 1.4h8.8a2 2 0 0 0 1.9-1.4L23 6H6" />
           </svg>
           <span className="absolute -top-1 -right-2 bg-rose-500 text-white rounded-full px-2 py-1 text-xs">
-            {cartProducts.length || 0}
+            {cartProducts?.length || 0}
           </span>
         </div>
       </div>

@@ -1,8 +1,68 @@
 import { useCartState } from "app/store/cart";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { Loader } from "../app/components/Loader";
 
 export default function Cart() {
+  const router = useRouter();
+
   const { cartProducts, removeProductFromCart } = useCartState();
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handlePlaceOrder = () => {
+    setIsLoading(true);
+    // Simulate payment success (you would replace this with actual Razorpay integration)
+    setTimeout(() => {
+      setPaymentSuccess(true);
+      setIsLoading(false);
+    }, 2000);
+  };
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (paymentSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-rose-500">
+        <div className="bg-white rounded-lg p-8 max-w-md mx-4 shadow-lg text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="100"
+            height="100"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            className="mx-auto text-green-500 h-20 w-20"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <h1 className="text-3xl font-bold text-gray-800 mt-6">
+            Payment Successful!
+          </h1>
+          <p className="text-gray-600 mt-4">
+            Thank you for your order. Your payment has been successfully
+            processed.
+          </p>
+          <button
+            onClick={() => {
+              router.push(`/products`);
+            }}
+            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 mt-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none"
+          >
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="selection:bg-rose-500 selection:text-white bg-rose-100 p-5">
@@ -53,6 +113,14 @@ export default function Cart() {
                 </p>
               </div>
             ))}
+          </div>
+          <div className="text-center mt-5">
+            <button
+              onClick={handlePlaceOrder}
+              className="bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in transform hover:scale-105 focus:outline-none"
+            >
+              Place Order
+            </button>
           </div>
         </div>
       )}

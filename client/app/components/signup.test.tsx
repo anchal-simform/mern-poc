@@ -6,7 +6,7 @@ import {
   getByTestId,
   getByDisplayValue,
 } from "@testing-library/react";
-import SignupForm from "./SingUp";
+import SignupForm from "./SignUp";
 
 jest.mock("next/router", () => ({
   useRouter: jest.fn(),
