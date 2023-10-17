@@ -11,9 +11,6 @@ describe("LoginForm Component", () => {
   it("should submit the form with valid data", async () => {
     // Mock the push function of useRouter
     const mockPush = jest.fn();
-    require("next/router").useRouter.mockReturnValue({
-      push: mockPush,
-    });
 
     const { getByLabelText, getByText } = render(<LoginForm />);
 
