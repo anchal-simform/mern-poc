@@ -1,5 +1,5 @@
 import { gql, useMutation } from "@apollo/client";
-import { useCartState } from "app/store/cart";
+import { useCartState } from "../app/store/cart";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -138,6 +138,7 @@ export default function Cart() {
           </div>
           <div className="text-center mt-5">
             <button
+              data-testid="place-order"
               onClick={handlePlaceOrder}
               className="bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in transform hover:scale-105 focus:outline-none"
             >
