@@ -154,11 +154,17 @@ export default function LoginForm() {
                       <svg
                         aria-hidden="true"
                         className="inline w-6 h-6 mr-2 text-white animate-spin fill-rose-600 opacity-100"
-                        viewBox="0 0 100 101"
-                        fill="none"
                         xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24" // Adjust the viewBox as needed
                       >
-                        {/* SVG for Spinner Animation */}
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
                       </svg>
                     </div>
                   ) : (
