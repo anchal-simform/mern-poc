@@ -8,6 +8,7 @@ import Link from "next/link";
 // import { useSuspenseQuery } from "@apollo/experimental-nextjs-app-support/ssr";
 import { gql, useMutation } from "@apollo/client";
 import { useEffect } from "react";
+import { ErrorMessage } from "@hookform/error-message";
 
 export const LOGIN = gql`
   mutation Login($email: String, $password: String) {
@@ -37,6 +38,7 @@ export default function LoginForm() {
   const {
     handleSubmit,
     register,
+    trigger,
     formState: { errors, isSubmitting, isDirty, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
@@ -83,6 +85,12 @@ export default function LoginForm() {
                 onSubmit={handleSubmit(onSubmit)}
               >
                 {/* Email Input */}
+                <label
+                  htmlFor="email"
+                  className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+                >
+                  Email address
+                </label>
                 <div className="relative">
                   <input
                     {...register("email", { required: true })}
@@ -92,22 +100,27 @@ export default function LoginForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="john@doe.com"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("email");
+                    }}
                   />
-                  {errors?.email && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.email?.message}
-                    </p>
-                  )}
-                  <label
-                    htmlFor="email"
-                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
-                  >
-                    Email address
-                  </label>
+                  <ErrorMessage
+                    errors={errors}
+                    name="email"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Password Input */}
                 <div className="relative mt-10">
+                  <label
+                    htmlFor="password"
+                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+                  >
+                    Password
+                  </label>
                   <input
                     {...register("password", { required: true })}
                     id="password"
@@ -116,18 +129,17 @@ export default function LoginForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="Password"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("password");
+                    }}
                   />
-                  {errors?.password && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.password?.message}
-                    </p>
-                  )}
-                  <label
-                    htmlFor="password"
-                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
-                  >
-                    Password
-                  </label>
+                  <ErrorMessage
+                    errors={errors}
+                    name="password"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Submit Button */}

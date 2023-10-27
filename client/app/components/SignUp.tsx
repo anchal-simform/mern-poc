@@ -37,7 +37,7 @@ export const SIGNUP = gql`
 `;
 
 const signupSchema = z.object({
-  name: z.string().min(2).max(50).optional(),
+  fullname: z.string().min(2).max(50).optional(),
   email: z.string().email(),
   password: z.string().min(8),
   username: z.string().min(4).max(20),
@@ -53,6 +53,7 @@ export default function SignupForm() {
   const {
     handleSubmit,
     register,
+    trigger,
     formState: { errors, isSubmitting, isDirty, isValid },
     setError,
     setValue,
@@ -60,6 +61,7 @@ export default function SignupForm() {
   } = useForm<FormData>({
     resolver: zodResolver(signupSchema),
   });
+  console.log(errors, "errors");
 
   // Form submission function
   async function onSubmit(data: FormData) {
@@ -89,7 +91,7 @@ export default function SignupForm() {
             email: data.email,
             password: data.password,
             username: data.username,
-            fullname: data.name,
+            fullname: data.fullname,
             gender: data.gender,
           },
         });
@@ -139,26 +141,31 @@ export default function SignupForm() {
               >
                 {/* Name Input */}
                 <div className="relative">
-                  <input
-                    {...register("name")}
-                    id="name"
-                    name="name"
-                    type="text"
-                    className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
-                    placeholder="John Doe"
-                    autoComplete="off"
-                  />
-                  {errors?.name && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.name?.message}
-                    </p>
-                  )}
                   <label
-                    htmlFor="name"
+                    htmlFor="fullname"
                     className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
                   >
                     Full Name
                   </label>
+                  <input
+                    {...register("fullname")}
+                    id="fullname"
+                    name="fullname"
+                    type="text"
+                    className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
+                    placeholder="John Doe"
+                    autoComplete="off"
+                    onBlur={() => {
+                      trigger("fullname");
+                    }}
+                  />
+                  <ErrorMessage
+                    errors={errors}
+                    name="fullname"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Email Input */}
@@ -177,6 +184,9 @@ export default function SignupForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="john@doe.com"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("email");
+                    }}
                   />
                   <ErrorMessage
                     errors={errors}
@@ -203,6 +213,9 @@ export default function SignupForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="Password"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("password");
+                    }}
                   />
                   <ErrorMessage
                     errors={errors}
@@ -229,6 +242,9 @@ export default function SignupForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="johndoe123"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("username");
+                    }}
                   />
                   <ErrorMessage
                     errors={errors}
@@ -252,6 +268,9 @@ export default function SignupForm() {
                     id="gender"
                     name="gender"
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
+                    onBlur={() => {
+                      trigger("gender");
+                    }}
                   >
                     <option value="" disabled>
                       Select gender

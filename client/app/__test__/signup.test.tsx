@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import SignupForm, { SIGNUP } from "./SignUp"; // Import your component
+import SignupForm, { SIGNUP } from "../components/SignUp"; // Import your component
 import { MockedProvider } from "@apollo/client/testing";
 import { act } from "react-dom/test-utils";
 

@@ -1,10 +1,9 @@
-import Head from "next/head";
 import { useState } from "react";
 import update from "immutability-helper";
 import { useCartState } from "../app/store/cart";
 import { useRouter } from "next/router";
 
-export default function Products({ productsList }) {
+export default function Products({ productsList }: any) {
   if (!Array.isArray(productsList)) {
     // Handle the case where products is not an array, e.g., display an error message
     return (
@@ -168,7 +167,7 @@ export async function getServerSideProps() {
     return {
       props: {
         productsList:
-          res?.products?.map((pd) => ({
+          res?.products?.map((pd: any) => ({
             id: pd.id,
             price: pd.price,
             thumbnail: pd.thumbnail,
@@ -177,7 +176,7 @@ export async function getServerSideProps() {
           })) || [],
       },
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching products:", error);
     return {
       props: {

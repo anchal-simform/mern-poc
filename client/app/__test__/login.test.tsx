@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import LoginForm, { LOGIN } from "./Login";
+import LoginForm, { LOGIN } from "../components/Login";
 import { MockedProvider } from "@apollo/client/testing";
 
 // Mock useRouter from next/router
