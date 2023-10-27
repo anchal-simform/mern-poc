@@ -5,9 +5,9 @@ export default function HeaderDropdown() {
   const [open, setIsOpen] = useState(false);
   const router = useRouter();
   return (
-    <div className="fixed top-0 right-44 mt-4 mr-4 dropdown inline-block z-50">
+    <div className="fixed top-0 right-44 mt-4 mr-4 dropdown inline-block z-5">
       <button
-        className="bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded inline-flex items-center"
+        className="bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg inline-flex items-center"
         onClick={() => {
           setIsOpen((flag) => !flag);
         }}

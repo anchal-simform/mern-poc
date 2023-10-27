@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import { useApolloClient } from "@apollo/client";
 import { Loader } from "../app/components/Loader";
 import { isAuthenticated } from "utils";
-import HeaderDropdown from "app/components/HeaderDropdown";
+import HeaderDropdown from "../app/components/HeaderDropdown";
 
 export default function Products() {
   const router = useRouter();
@@ -91,7 +91,7 @@ export default function Products() {
         </div>
       </div>
 
-      <div className="flex min-h-screen items-center justify-center bg-rose-100 p-10 mt-5">
+      <div className="flex min-h-screen items-center justify-center bg-rose-100 p-10 mt-24">
         <div className="container mx-auto">
           {/* Product Listing */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

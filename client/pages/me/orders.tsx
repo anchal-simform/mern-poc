@@ -2,11 +2,12 @@
 
 import { useLazyQuery } from "@apollo/client";
 import { gql } from "@apollo/client";
-import HeaderDropdown from "app/components/HeaderDropdown";
+import HeaderDropdown from "../../app/components/HeaderDropdown";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { Loader } from "../../app/components/Loader";
 import { isAuthenticated } from "../../utils";
+import Link from "next/link";
 
 const MY_ORDERS = gql`
   query Query {
@@ -46,6 +47,12 @@ export default function MyProfile() {
     <div className="selection:bg-rose-500 selection:text-white">
       <div className="flex min-h-screen items-center justify-center bg-rose-100">
         <HeaderDropdown />
+        <Link
+          className="bg-rose-500 fixed right-0 top-4 inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
+          href="/products"
+        >
+          Shop more
+        </Link>
         <div className="flex-1 py-5">
           <div className="mx-auto w-1/2 overflow-hidden rounded-xl bg-white shadow-xl">
             <div className="rounded-tr-4xl bg-white px-10 py-14">
