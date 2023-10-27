@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Loader } from "../app/components/Loader";
-import HeaderDropdown from "app/components/HeaderDropdown";
+import HeaderDropdown from "../app/components/HeaderDropdown";
+
 
 const ORDER = gql`
   mutation Order($products: [ProductInput], $total: Float) {
