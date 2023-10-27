@@ -1,34 +1,23 @@
 import React from "react";
 import {
   render,
-  fireEvent,
   screen,
-  waitFor,
-  act,
 } from "@testing-library/react";
 import Cart from "../../pages/cart";
 
-// Mock the useRouter function
+// Mock the next/router dependency
 jest.mock("next/router", () => ({
   useRouter: () => ({
     push: jest.fn(),
   }),
 }));
 
-// Mock the useMutation function
-jest.mock("@apollo/client", () => ({
-  gql: jest.fn(),
-  useMutation: () => ({
-    data: null,
-    loading: false,
-    error: null,
-  }),
-}));
-
 const mockOrder = jest.fn();
+const resetStore = jest.fn();
 jest.mock("@apollo/client", () => ({
   gql: jest.fn(),
   useMutation: () => [mockOrder, { data: null, loading: false, error: null }],
+  useApolloClient: () => resetStore,
 }));
 
 describe("Cart", () => {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import update from "immutability-helper";
 import { useCartState } from "../app/store/cart";
 import { useRouter } from "next/router";
+import { useApolloClient } from "@apollo/client";
 
 export default function Products({ productsList }: any) {
   if (!Array.isArray(productsList)) {
@@ -18,10 +19,20 @@ export default function Products({ productsList }: any) {
   const router = useRouter();
   const [products, setProducts] = useState(productsList);
   const { cartProducts, addProductToCart } = useCartState();
+  const client = useApolloClient();
 
   return (
     <div className="selection:bg-rose-500 selection:text-white bg-rose-100">
       <div className="flex justify-end pt-2">
+        <div
+          className="bg-rose-500 fixed inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
+          onClick={() => {
+            client.resetStore();
+            router.push("/");
+          }}
+        >
+          Logout
+        </div>
         <div
           className="fixed inline-flex items-center mr-8 cursor-pointer"
           onClick={() => {

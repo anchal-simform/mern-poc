@@ -7,6 +7,11 @@ jest.mock("next/router", () => ({
   useRouter: jest.fn(),
 }));
 
+const resetStore = jest.fn();
+jest.mock("@apollo/client", () => ({
+  useApolloClient: () => resetStore,
+}));
+
 describe("Products", () => {
   it("renders products and allows adding to the cart", () => {
     // Mock the products data for testing
@@ -38,7 +43,6 @@ describe("Products", () => {
 
       // Example assertion: Simulate clicking the "Add to cart" button
       fireEvent.click(addToCartButton);
-
     });
   });
 });

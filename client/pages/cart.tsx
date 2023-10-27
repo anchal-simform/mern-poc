@@ -1,4 +1,4 @@
-import { gql, useMutation } from "@apollo/client";
+import { gql, useApolloClient, useMutation } from "@apollo/client";
 import { useCartState } from "../app/store/cart";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -22,6 +22,7 @@ const ORDER = gql`
 
 export default function Cart() {
   const router = useRouter();
+  const client = useApolloClient();
 
   const { cartProducts, removeProductFromCart } = useCartState();
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -88,6 +89,15 @@ export default function Cart() {
 
   return (
     <div className="selection:bg-rose-500 selection:text-white bg-rose-100 p-5">
+      <div
+        className="bg-rose-500 fixed inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
+        onClick={() => {
+          client.resetStore();
+          router.push("/");
+        }}
+      >
+        Logout
+      </div>
       <h1 className="text-2xl font-semibold text-gray-900 text-center">
         Shopping Cart
         <Link

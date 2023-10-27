@@ -85,13 +85,14 @@ export default function LoginForm() {
                 onSubmit={handleSubmit(onSubmit)}
               >
                 {/* Email Input */}
-                <label
-                  htmlFor="email"
-                  className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
-                >
-                  Email address
-                </label>
+
                 <div className="relative">
+                  <label
+                    htmlFor="email"
+                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+                  >
+                    Email address
+                  </label>
                   <input
                     {...register("email", { required: true })}
                     id="email"
