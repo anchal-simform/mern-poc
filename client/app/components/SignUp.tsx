@@ -9,6 +9,7 @@ import { ErrorMessage } from "@hookform/error-message";
 const MAIL_CHECK_API_TOKEN = "fdec26ce0541b04b13bc2166820656b0";
 
 import { gql, useMutation } from "@apollo/client";
+import { Loader } from "./Loader";
 
 export const SIGNUP = gql`
   mutation Mutation(
@@ -95,6 +96,10 @@ export default function SignupForm() {
         console.log(`Email ${data?.email} does not exist.`);
       }
     } catch (error) {}
+  }
+
+  if (loading) {
+    return <Loader />;
   }
 
   return (
@@ -277,6 +282,8 @@ export default function SignupForm() {
                     )}
                   />
                 </div>
+
+                {error && <p className="text-red-500">{error.message}</p>}
 
                 {/* Submit Button */}
                 <button
