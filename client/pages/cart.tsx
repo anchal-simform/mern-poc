@@ -1,26 +1,48 @@
+import { gql, useMutation } from "@apollo/client";
 import { useCartState } from "app/store/cart";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Loader } from "../app/components/Loader";
 
+const ORDER = gql`
+  mutation Order($products: [ProductInput], $total: Float) {
+    order(products: $products, total: $total) {
+      total
+      products {
+        id
+        title
+        description
+        thumbnail
+        buyQty
+      }
+    }
+  }
+`;
+
 export default function Cart() {
   const router = useRouter();
 
   const { cartProducts, removeProductFromCart } = useCartState();
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [order, { data, loading, error }] = useMutation(ORDER);
 
-  const handlePlaceOrder = () => {
-    setIsLoading(true);
-    // Simulate payment success (you would replace this with actual Razorpay integration)
-    setTimeout(() => {
-      setPaymentSuccess(true);
-      setIsLoading(false);
-    }, 2000);
+  const handlePlaceOrder = async () => {
+    await order({
+      variables: {
+        products: cartProducts,
+        total: cartProducts?.reduce(
+          (accumulator: number, currentProduct: any) => {
+            return accumulator + currentProduct.buyQty * currentProduct.price;
+          },
+          0
+        ),
+      },
+    });
+    setPaymentSuccess(true);
   };
 
-  if (isLoading) {
+  if (loading) {
     return <Loader />;
   }
 

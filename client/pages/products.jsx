@@ -55,7 +55,7 @@ export default function Products({ productsList }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {products.map((product, idx) => (
               <div
-                key={product.id}
+                key={product?.id}
                 className="bg-white rounded shadow-md px-3 py-4 text-center relative"
               >
                 <div className="h-32 m-auto mb-5">
@@ -66,13 +66,13 @@ export default function Products({ productsList }) {
                   />
                 </div>
                 <h2 className="text-lg font-semibold truncate">
-                  {product.title}
+                  {product?.title}
                 </h2>
                 <p className="text-gray-700 truncate-lines-2">
-                  {product.description}
+                  {product?.description}
                 </p>
                 <p className="text-rose-500 font-semibold mt-2">
-                  ${product.price}
+                  ${product?.price}
                 </p>
                 <div className="flex mt-2 justify-center">
                   <button
@@ -161,14 +161,20 @@ export async function getServerSideProps() {
     }
 
     const res = await resData.json();
-    console.log(res?.products, "res?.products");
     if (!Array.isArray(res?.products)) {
       throw new Error("API response is not an array");
     }
 
     return {
       props: {
-        productsList: res?.products || [],
+        productsList:
+          res?.products?.map((pd) => ({
+            id: pd.id,
+            price: pd.price,
+            thumbnail: pd.thumbnail,
+            title: pd.title,
+            description: pd.description,
+          })) || [],
       },
     };
   } catch (error) {

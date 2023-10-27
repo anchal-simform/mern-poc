@@ -1,70 +1,46 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react";
-import LoginForm from "./Login";
+import { render, fireEvent, screen } from "@testing-library/react";
+import LoginForm, { LOGIN } from "./Login";
+import { MockedProvider } from "@apollo/client/testing";
 
 // Mock useRouter from next/router
 jest.mock("next/router", () => ({
   useRouter: jest.fn(),
 }));
 
-describe("LoginForm Component", () => {
-  it("should submit the form with valid data", async () => {
-    // Mock the push function of useRouter
-    const mockPush = jest.fn();
+describe("LoginForm", () => {
+  it("renders the form and handles GraphQL mutation", async () => {
+    const mocks = [
+      {
+        request: {
+          query: LOGIN,
+          variables: {
+            email: "john@example.com",
+            password: "securepassword",
+          },
+        },
+      },
+    ];
+    render(
+      <MockedProvider mocks={mocks} addTypename={false}>
+        <LoginForm />
+      </MockedProvider>
+    );
 
-    const { getByLabelText, getByText } = render(<LoginForm />);
+    // Find form elements
+    const emailInput = screen.getByLabelText("Email address");
+    const passwordInput = screen.getByLabelText("Password");
+    const submitButton = screen.getByText("Sign In");
 
-    const emailInput = getByLabelText("Email address");
-    const passwordInput = getByLabelText("Password");
-    const submitButton = getByText("Sign In");
+    // Simulate user input
+    fireEvent.change(emailInput, { target: { value: "john@example.com" } });
+    fireEvent.change(passwordInput, { target: { value: "securepassword" } });
 
-    fireEvent.change(emailInput, { target: { value: "test@example.com" } });
-    fireEvent.change(passwordInput, { target: { value: "password123" } });
-    
+    // Check if the form fields have been updated
+    expect(emailInput.value).toBe("john@example.com");
+    expect(passwordInput.value).toBe("securepassword");
+
+    // Submit the form
     fireEvent.click(submitButton);
-
-    // Wait for the form submission to complete
-    await waitFor(() => {
-      expect(mockPush);
-    });
   });
-
-//   it("should show error messages for invalid data", async () => {
-//     const { getByLabelText, getByText } = render(<LoginForm />);
-
-//     const emailInput = getByLabelText("Email address");
-//     const passwordInput = getByLabelText("Password");
-//     const submitButton = getByText("Sign In");
-
-//     fireEvent.change(emailInput, { target: { value: "invalid-email" } });
-//     fireEvent.change(passwordInput, { target: { value: "short" } });
-
-//     fireEvent.click(submitButton);
-
-//     // Wait for the error messages to appear
-//     await waitFor(() => {
-//       expect(getByText("Invalid email address")).toBeInTheDocument();
-//       expect(getByText("Password must be at least 8 characters")).toBeInTheDocument();
-//     });
-//   });
-
-//   it("should disable the submit button initially", () => {
-//     const { getByText } = render(<LoginForm />);
-//     const submitButton = getByText("Sign In");
-
-//     expect(submitButton).toBeDisabled();
-//   });
-
-//   it("should enable the submit button when the form is filled correctly", () => {
-//     const { getByLabelText, getByText } = render(<LoginForm />);
-
-//     const emailInput = getByLabelText("Email address");
-//     const passwordInput = getByLabelText("Password");
-//     const submitButton = getByText("Sign In");
-
-//     fireEvent.change(emailInput, { target: { value: "test@example.com" } });
-//     fireEvent.change(passwordInput, { target: { value: "password123" } });
-
-//     expect(submitButton).not.toBeDisabled();
-//   });
 });

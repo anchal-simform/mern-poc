@@ -1,9 +1,21 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
+// import { useSuspenseQuery } from "@apollo/experimental-nextjs-app-support/ssr";
+import { gql, useMutation } from "@apollo/client";
+import { useEffect } from "react";
+
+export const LOGIN = gql`
+  mutation Login($email: String, $password: String) {
+    login(email: $email, password: $password) {
+      token
+    }
+  }
+`;
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -14,6 +26,14 @@ type FormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
   const router = useRouter();
+  const [login, { data, loading, error }] = useMutation(LOGIN);
+
+  useEffect(() => {
+    if (data?.login?.token) {
+      localStorage.setItem("token", data?.login?.token);
+      router.push("/products");
+    }
+  }, [data?.login?.token]);
   const {
     handleSubmit,
     register,
@@ -25,14 +45,11 @@ export default function LoginForm() {
   async function onSubmit(data: FormData) {
     console.log(isSubmitting);
     console.log(data);
-    // Replace this with a server action or fetch an API endpoint to authenticate
-    // await new Promise<void>((resolve) => {
-    //   setTimeout(() => {
-    //     resolve();
-    //   }, 2000); // 2 seconds in milliseconds
-    // });
-    // router.push("/tweets");
+    await login({ variables: { email: data.email, password: data.password } });
   }
+
+  if (loading) return <div>Submitting...</div>;
+  if (error) return <div>Submission error! ${error.message}</div>;
 
   return (
     <div className="selection:bg-rose-500 selection:text-white">
@@ -146,7 +163,9 @@ export default function LoginForm() {
                 Forgot your password?
               </Link>
               <div className="mt-2 flex justify-center gap-4">
-                <span className="mt-1 block text-center text-sm font-medium text-rose-600">Don't have account?</span>
+                <span className="mt-1 block text-center text-sm font-medium text-rose-600">
+                  Don't have account?
+                </span>
                 <Link
                   className="block text-center text-sm font-medium text-rose-600 underline hover:bg-rose-100 px-2 py-0.5 rounded hover:underline focus:outline-none focus:ring-2 focus:ring-rose-500"
                   href="/signup"
