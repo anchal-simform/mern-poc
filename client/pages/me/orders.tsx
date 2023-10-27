@@ -29,7 +29,9 @@ const MY_ORDERS = gql`
 
 export default function MyProfile() {
   const router = useRouter();
-  const [getData, { loading, error, data }] = useLazyQuery(MY_ORDERS);
+  const [getData, { loading, error, data }] = useLazyQuery(MY_ORDERS, {
+    fetchPolicy: "no-cache",
+  });
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -37,7 +39,7 @@ export default function MyProfile() {
     } else {
       getData();
     }
-  }, []);
+  }, [router.asPath]);
 
   const orders = data?.myOrders;
   if (loading) return <Loader />;
