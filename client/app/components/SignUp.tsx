@@ -11,7 +11,7 @@ const MAIL_CHECK_API_TOKEN = "fdec26ce0541b04b13bc2166820656b0";
 import { gql, useMutation } from "@apollo/client";
 
 export const SIGNUP = gql`
-  mutation SignUp(
+  mutation Mutation(
     $username: String
     $email: String
     $password: String
@@ -28,9 +28,9 @@ export const SIGNUP = gql`
       token
       user {
         email
-        username
         fullname
         gender
+        username
       }
     }
   }

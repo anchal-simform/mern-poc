@@ -19,16 +19,16 @@ const resolvers = {
   Mutation: {
     register: async (_, { username, email, password, fullname, gender }) => {
       const existingUser = await User.findOne({ email });
-
+      console.log(existingUser, "existingUser");
       if (existingUser) {
         throw new AuthenticationError("User already exists");
       }
 
       const user = new User({ username, email, password, fullname, gender });
       await user.save();
-
+      console.log({ user });
       const token = generateToken(user);
-      console.log({ token, user });
+      console.log({ token });
       return { token, user };
     },
     login: async (_, { email, password }) => {

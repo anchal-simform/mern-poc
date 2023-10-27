@@ -90,7 +90,7 @@ export default function Cart() {
   return (
     <div className="selection:bg-rose-500 selection:text-white bg-rose-100 p-5">
       <div
-        className="bg-rose-500 fixed inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
+        className="bg-rose-500 fixed right-0 inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
         onClick={() => {
           client.resetStore();
           router.push("/");
