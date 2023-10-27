@@ -6,6 +6,8 @@ import { useCartState } from "../app/store/cart";
 import { useRouter } from "next/router";
 import { useApolloClient } from "@apollo/client";
 import { Loader } from "../app/components/Loader";
+import { isAuthenticated } from "utils";
+import HeaderDropdown from "app/components/HeaderDropdown";
 
 export default function Products() {
   const router = useRouter();
@@ -15,6 +17,10 @@ export default function Products() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push("/");
+      return;
+    }
     (async function () {
       setLoading(true);
       const resData = await fetch("https://dummyjson.com/products");
@@ -48,8 +54,9 @@ export default function Products() {
   return (
     <div className="selection:bg-rose-500 selection:text-white bg-rose-100">
       <div className="flex justify-end pt-2">
+        <HeaderDropdown />
         <div
-          className="bg-rose-500 fixed inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
+          className="bg-rose-500 fixed right-4 top-4 inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
           onClick={() => {
             client.resetStore();
             localStorage.removeItem("token");
@@ -59,7 +66,7 @@ export default function Products() {
           Logout
         </div>
         <div
-          className="fixed inline-flex items-center mr-8 cursor-pointer"
+          className="fixed inline-flex items-center right-0 top-4 mr-8 cursor-pointer"
           onClick={() => {
             router.push(`/cart`);
           }}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Loader } from "../app/components/Loader";
+import HeaderDropdown from "app/components/HeaderDropdown";
 
 const ORDER = gql`
   mutation Order($products: [ProductInput], $total: Float) {
@@ -89,8 +90,10 @@ export default function Cart() {
 
   return (
     <div className="selection:bg-rose-500 selection:text-white bg-rose-100 p-5">
+      <HeaderDropdown />
+
       <div
-        className="bg-rose-500 fixed right-0 inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
+        className="bg-rose-500 fixed right-0 top-4 inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
         onClick={() => {
           client.resetStore();
           localStorage.removeItem("token");

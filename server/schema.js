@@ -9,8 +9,16 @@ const typeDefs = gql`
     gender: String
   }
 
+  type Order {
+    _id: String
+    products: [Product!]!
+    total: Float!
+    userId: String
+  }
+
   type Query {
     me: User
+    myOrders: [Order!]!
   }
 
   type Mutation {
