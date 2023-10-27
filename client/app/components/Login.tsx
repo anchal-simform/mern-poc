@@ -5,10 +5,13 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
-// import { useSuspenseQuery } from "@apollo/experimental-nextjs-app-support/ssr";
 import { gql, useMutation } from "@apollo/client";
 import { useEffect } from "react";
 import { ErrorMessage } from "@hookform/error-message";
+import { isAuthenticated } from "utils";
+import { Loader } from "./Loader";
+
+const MAIL_CHECK_API_TOKEN = "fdec26ce0541b04b13bc2166820656b0";
 
 export const LOGIN = gql`
   mutation Login($email: String, $password: String) {
@@ -30,28 +33,60 @@ export default function LoginForm() {
   const [login, { data, loading, error }] = useMutation(LOGIN);
 
   useEffect(() => {
+    if (isAuthenticated()) {
+      router.push("/products");
+    }
+  }, []);
+
+  useEffect(() => {
     if (data?.login?.token) {
       localStorage.setItem("token", data?.login?.token);
       router.push("/products");
     }
   }, [data?.login?.token]);
+
   const {
     handleSubmit,
     register,
     trigger,
+    clearErrors,
+    setError,
     formState: { errors, isSubmitting, isDirty, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
   });
 
   async function onSubmit(data: FormData) {
-    console.log(isSubmitting);
-    console.log(data);
-    await login({ variables: { email: data.email, password: data.password } });
+    try {
+      const response: any = await fetch(
+        `http://apilayer.net/api/check?access_key=${MAIL_CHECK_API_TOKEN}&email=${data.email}&smtp=1&format=1`
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const jsonData = await response.json(); // Parse the response as JSON
+
+      if (jsonData.format_valid && jsonData.mx_found) {
+        console.log(`Email ${data?.email} exists.`);
+        clearErrors("email");
+
+        await login({
+          variables: { email: data.email, password: data.password },
+        });
+
+        router.push("/products");
+      } else {
+        setError("email", {
+          message: "Provided email is not valid",
+        });
+        console.log(`Email ${data?.email} does not exist.`);
+      }
+    } catch (error) {}
   }
 
-  if (loading) return <div>Submitting...</div>;
-  if (error) return <div>Submission error! ${error.message}</div>;
+  if (loading) return <Loader />;
 
   return (
     <div className="selection:bg-rose-500 selection:text-white">
@@ -143,6 +178,7 @@ export default function LoginForm() {
                   />
                 </div>
 
+                {error && <p className="text-red-500">{error.message}</p>}
                 {/* Submit Button */}
                 <button
                   type="submit"

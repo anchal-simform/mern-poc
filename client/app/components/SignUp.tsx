@@ -61,13 +61,8 @@ export default function SignupForm() {
   } = useForm<FormData>({
     resolver: zodResolver(signupSchema),
   });
-  console.log(errors, "errors");
 
-  // Form submission function
   async function onSubmit(data: FormData) {
-    console.log(isSubmitting);
-    console.log(data);
-
     try {
       const response: any = await fetch(
         `http://apilayer.net/api/check?access_key=${MAIL_CHECK_API_TOKEN}&email=${data.email}&smtp=1&format=1`
@@ -78,9 +73,6 @@ export default function SignupForm() {
       }
 
       const jsonData = await response.json(); // Parse the response as JSON
-
-      // Handle the JSON data
-      console.log(jsonData);
 
       if (jsonData.format_valid && jsonData.mx_found) {
         console.log(`Email ${data?.email} exists.`);
@@ -103,8 +95,6 @@ export default function SignupForm() {
         console.log(`Email ${data?.email} does not exist.`);
       }
     } catch (error) {}
-
-    // Redirect to login page after successful signup
   }
 
   return (
