@@ -23,7 +23,9 @@ const MY_PROFILE = gql`
 
 export default function MyProfile() {
   const router = useRouter();
-  const [getData, { loading, error, data }] = useLazyQuery(MY_PROFILE);
+  const [getData, { loading, error, data }] = useLazyQuery(MY_PROFILE, {
+    fetchPolicy: "no-cache",
+  });
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -31,7 +33,7 @@ export default function MyProfile() {
     } else {
       getData();
     }
-  }, []);
+  }, [router.asPath]);
 
   const userProfile = data?.me;
 
