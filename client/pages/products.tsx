@@ -52,6 +52,7 @@ export default function Products() {
           className="bg-rose-500 fixed inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
           onClick={() => {
             client.resetStore();
+            localStorage.removeItem("token");
             router.push("/");
           }}
         >
