@@ -17,6 +17,8 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     console.log("first");
     if (!isAuthenticated()) {
       router.push("/");
+    } else {
+      router.push("/products");
     }
   }, []);
   return (
