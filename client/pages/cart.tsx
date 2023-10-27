@@ -1,26 +1,49 @@
-import { useCartState } from "app/store/cart";
+import { gql, useApolloClient, useMutation } from "@apollo/client";
+import { useCartState } from "../app/store/cart";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Loader } from "../app/components/Loader";
 
+const ORDER = gql`
+  mutation Order($products: [ProductInput], $total: Float) {
+    order(products: $products, total: $total) {
+      total
+      products {
+        id
+        title
+        description
+        thumbnail
+        buyQty
+      }
+    }
+  }
+`;
+
 export default function Cart() {
   const router = useRouter();
+  const client = useApolloClient();
 
   const { cartProducts, removeProductFromCart } = useCartState();
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [order, { data, loading, error }] = useMutation(ORDER);
 
-  const handlePlaceOrder = () => {
-    setIsLoading(true);
-    // Simulate payment success (you would replace this with actual Razorpay integration)
-    setTimeout(() => {
-      setPaymentSuccess(true);
-      setIsLoading(false);
-    }, 2000);
+  const handlePlaceOrder = async () => {
+    await order({
+      variables: {
+        products: cartProducts,
+        total: cartProducts?.reduce(
+          (accumulator: number, currentProduct: any) => {
+            return accumulator + currentProduct.buyQty * currentProduct.price;
+          },
+          0
+        ),
+      },
+    });
+    setPaymentSuccess(true);
   };
 
-  if (isLoading) {
+  if (loading) {
     return <Loader />;
   }
 
@@ -66,6 +89,16 @@ export default function Cart() {
 
   return (
     <div className="selection:bg-rose-500 selection:text-white bg-rose-100 p-5">
+      <div
+        className="bg-rose-500 fixed right-0 inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
+        onClick={() => {
+          client.resetStore();
+          localStorage.removeItem("token");
+          router.push("/");
+        }}
+      >
+        Logout
+      </div>
       <h1 className="text-2xl font-semibold text-gray-900 text-center">
         Shopping Cart
         <Link
@@ -116,6 +149,7 @@ export default function Cart() {
           </div>
           <div className="text-center mt-5">
             <button
+              data-testid="place-order"
               onClick={handlePlaceOrder}
               className="bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in transform hover:scale-105 focus:outline-none"
             >

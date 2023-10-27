@@ -1,9 +1,10 @@
 const express = require("express");
-const { ApolloServer } = require("apollo-server-express");
+const { ApolloServer, AuthenticationError } = require("apollo-server-express");
 const typeDefs = require("./schema");
 const resolvers = require("./resolvers");
 const { verifyToken } = require("./auth");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 mongoose.connect(
   "mongodb+srv://meet:meet@cluster0.hviqg.mongodb.net/my%2Dpoc%2Ddb?retryWrites=true&w=majority",
@@ -19,12 +20,13 @@ mongoose.connection.on("connected", () => {
 
 const app = express();
 
+app.use(cors());
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req }) => {
-    const token = req.headers.authorization || "";
-
+    const token = req?.headers?.authorization?.replace(/^Bearer\s+/, "") || "";
     if (token) {
       try {
         const user = verifyToken(token);
@@ -33,6 +35,11 @@ const server = new ApolloServer({
         throw new AuthenticationError("Invalid token");
       }
     }
+  },
+  playground: {
+    settings: {
+      "schema.polling.enable": false,
+    },
   },
 });
 

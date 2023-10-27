@@ -1,28 +1,63 @@
-import Head from "next/head";
-import { useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import update from "immutability-helper";
 import { useCartState } from "../app/store/cart";
 import { useRouter } from "next/router";
+import { useApolloClient } from "@apollo/client";
+import { Loader } from "../app/components/Loader";
 
-export default function Products({ productsList }) {
-  if (!Array.isArray(productsList)) {
-    // Handle the case where products is not an array, e.g., display an error message
-    return (
-      <div>
-        <p>Error: Products data is not available.</p>
-      </div>
-    );
-  }
-  productsList.forEach((product) => {
-    product.buyQty = 1;
-  });
+export default function Products() {
   const router = useRouter();
-  const [products, setProducts] = useState(productsList);
+  const [products, setProducts] = useState([]);
   const { cartProducts, addProductToCart } = useCartState();
+  const client = useApolloClient();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    (async function () {
+      setLoading(true);
+      const resData = await fetch("https://dummyjson.com/products");
+
+      const res = await resData.json();
+      if (!Array.isArray(res?.products)) {
+        throw new Error("API response is not an array");
+      }
+
+      const products =
+        res?.products?.map((pd: any) => ({
+          id: pd.id,
+          price: pd.price,
+          thumbnail: pd.thumbnail,
+          title: pd.title,
+          description: pd.description,
+        })) || [];
+
+      products.forEach((product: any) => {
+        product.buyQty = 1;
+      });
+      setProducts(products);
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="selection:bg-rose-500 selection:text-white bg-rose-100">
       <div className="flex justify-end pt-2">
+        <div
+          className="bg-rose-500 fixed inline-flex items-center mr-20 px-4 py-2 rounded-lg cursor-pointer"
+          onClick={() => {
+            client.resetStore();
+            localStorage.removeItem("token");
+            router.push("/");
+          }}
+        >
+          Logout
+        </div>
         <div
           className="fixed inline-flex items-center mr-8 cursor-pointer"
           onClick={() => {
@@ -49,13 +84,13 @@ export default function Products({ productsList }) {
         </div>
       </div>
 
-      <div className="flex min-h-screen items-center justify-center bg-rose-100 p-10">
+      <div className="flex min-h-screen items-center justify-center bg-rose-100 p-10 mt-5">
         <div className="container mx-auto">
           {/* Product Listing */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {products.map((product, idx) => (
               <div
-                key={product.id}
+                key={product?.id}
                 className="bg-white rounded shadow-md px-3 py-4 text-center relative"
               >
                 <div className="h-32 m-auto mb-5">
@@ -66,13 +101,13 @@ export default function Products({ productsList }) {
                   />
                 </div>
                 <h2 className="text-lg font-semibold truncate">
-                  {product.title}
+                  {product?.title}
                 </h2>
                 <p className="text-gray-700 truncate-lines-2">
-                  {product.description}
+                  {product?.description}
                 </p>
                 <p className="text-rose-500 font-semibold mt-2">
-                  ${product.price}
+                  ${product?.price}
                 </p>
                 <div className="flex mt-2 justify-center">
                   <button
@@ -149,35 +184,4 @@ export default function Products({ productsList }) {
       </div>
     </div>
   );
-}
-
-export async function getServerSideProps() {
-  try {
-    // Fetch data from the API
-    const resData = await fetch("https://dummyjson.com/products");
-
-    if (!resData.ok) {
-      throw new Error("API request failed");
-    }
-
-    const res = await resData.json();
-    console.log(res?.products, "res?.products");
-    if (!Array.isArray(res?.products)) {
-      throw new Error("API response is not an array");
-    }
-
-    return {
-      props: {
-        productsList: res?.products || [],
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    return {
-      props: {
-        productsList: [],
-        error: error.message, // Pass the error message to the component
-      },
-    };
-  }
 }

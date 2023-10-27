@@ -1,9 +1,22 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
+// import { useSuspenseQuery } from "@apollo/experimental-nextjs-app-support/ssr";
+import { gql, useMutation } from "@apollo/client";
+import { useEffect } from "react";
+import { ErrorMessage } from "@hookform/error-message";
+
+export const LOGIN = gql`
+  mutation Login($email: String, $password: String) {
+    login(email: $email, password: $password) {
+      token
+    }
+  }
+`;
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -14,9 +27,18 @@ type FormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
   const router = useRouter();
+  const [login, { data, loading, error }] = useMutation(LOGIN);
+
+  useEffect(() => {
+    if (data?.login?.token) {
+      localStorage.setItem("token", data?.login?.token);
+      router.push("/products");
+    }
+  }, [data?.login?.token]);
   const {
     handleSubmit,
     register,
+    trigger,
     formState: { errors, isSubmitting, isDirty, isValid },
   } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
@@ -25,14 +47,11 @@ export default function LoginForm() {
   async function onSubmit(data: FormData) {
     console.log(isSubmitting);
     console.log(data);
-    // Replace this with a server action or fetch an API endpoint to authenticate
-    // await new Promise<void>((resolve) => {
-    //   setTimeout(() => {
-    //     resolve();
-    //   }, 2000); // 2 seconds in milliseconds
-    // });
-    // router.push("/tweets");
+    await login({ variables: { email: data.email, password: data.password } });
   }
+
+  if (loading) return <div>Submitting...</div>;
+  if (error) return <div>Submission error! ${error.message}</div>;
 
   return (
     <div className="selection:bg-rose-500 selection:text-white">
@@ -66,7 +85,14 @@ export default function LoginForm() {
                 onSubmit={handleSubmit(onSubmit)}
               >
                 {/* Email Input */}
+
                 <div className="relative">
+                  <label
+                    htmlFor="email"
+                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+                  >
+                    Email address
+                  </label>
                   <input
                     {...register("email", { required: true })}
                     id="email"
@@ -75,22 +101,27 @@ export default function LoginForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="john@doe.com"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("email");
+                    }}
                   />
-                  {errors?.email && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.email?.message}
-                    </p>
-                  )}
-                  <label
-                    htmlFor="email"
-                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
-                  >
-                    Email address
-                  </label>
+                  <ErrorMessage
+                    errors={errors}
+                    name="email"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Password Input */}
                 <div className="relative mt-10">
+                  <label
+                    htmlFor="password"
+                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+                  >
+                    Password
+                  </label>
                   <input
                     {...register("password", { required: true })}
                     id="password"
@@ -99,18 +130,17 @@ export default function LoginForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="Password"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("password");
+                    }}
                   />
-                  {errors?.password && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.password?.message}
-                    </p>
-                  )}
-                  <label
-                    htmlFor="password"
-                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
-                  >
-                    Password
-                  </label>
+                  <ErrorMessage
+                    errors={errors}
+                    name="password"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Submit Button */}
@@ -124,11 +154,17 @@ export default function LoginForm() {
                       <svg
                         aria-hidden="true"
                         className="inline w-6 h-6 mr-2 text-white animate-spin fill-rose-600 opacity-100"
-                        viewBox="0 0 100 101"
-                        fill="none"
                         xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24" // Adjust the viewBox as needed
                       >
-                        {/* SVG for Spinner Animation */}
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
                       </svg>
                     </div>
                   ) : (
@@ -146,7 +182,9 @@ export default function LoginForm() {
                 Forgot your password?
               </Link>
               <div className="mt-2 flex justify-center gap-4">
-                <span className="mt-1 block text-center text-sm font-medium text-rose-600">Don't have account?</span>
+                <span className="mt-1 block text-center text-sm font-medium text-rose-600">
+                  Don't have account?
+                </span>
                 <Link
                   className="block text-center text-sm font-medium text-rose-600 underline hover:bg-rose-100 px-2 py-0.5 rounded hover:underline focus:outline-none focus:ring-2 focus:ring-rose-500"
                   href="/signup"

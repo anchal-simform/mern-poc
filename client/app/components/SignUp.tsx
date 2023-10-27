@@ -4,9 +4,40 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { ErrorMessage } from "@hookform/error-message";
+
+const MAIL_CHECK_API_TOKEN = "fdec26ce0541b04b13bc2166820656b0";
+
+import { gql, useMutation } from "@apollo/client";
+
+export const SIGNUP = gql`
+  mutation Mutation(
+    $username: String
+    $email: String
+    $password: String
+    $fullname: String
+    $gender: String
+  ) {
+    register(
+      username: $username
+      email: $email
+      password: $password
+      fullname: $fullname
+      gender: $gender
+    ) {
+      token
+      user {
+        email
+        fullname
+        gender
+        username
+      }
+    }
+  }
+`;
 
 const signupSchema = z.object({
-  name: z.string().min(2).max(50).optional(),
+  fullname: z.string().min(2).max(50).optional(),
   email: z.string().email(),
   password: z.string().min(8),
   username: z.string().min(4).max(20),
@@ -17,25 +48,63 @@ type FormData = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
   const router = useRouter();
+  const [signup, { data, loading, error }] = useMutation(SIGNUP);
+
   const {
     handleSubmit,
     register,
+    trigger,
     formState: { errors, isSubmitting, isDirty, isValid },
+    setError,
+    setValue,
+    clearErrors,
   } = useForm<FormData>({
     resolver: zodResolver(signupSchema),
   });
+  console.log(errors, "errors");
 
   // Form submission function
   async function onSubmit(data: FormData) {
     console.log(isSubmitting);
     console.log(data);
-    // Replace this with a server action or fetch an API endpoint to register the user
-    // await new Promise<void>((resolve) => {
-    //   setTimeout(() => {
-    //     resolve();
-    //   }, 2000); // Simulating a delay, replace with actual registration logic
-    // });
-    router.push("/login"); // Redirect to login page after successful signup
+
+    try {
+      const response: any = await fetch(
+        `http://apilayer.net/api/check?access_key=${MAIL_CHECK_API_TOKEN}&email=${data.email}&smtp=1&format=1`
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const jsonData = await response.json(); // Parse the response as JSON
+
+      // Handle the JSON data
+      console.log(jsonData);
+
+      if (jsonData.format_valid && jsonData.mx_found) {
+        console.log(`Email ${data?.email} exists.`);
+        clearErrors("email");
+
+        await signup({
+          variables: {
+            email: data.email,
+            password: data.password,
+            username: data.username,
+            fullname: data.fullname,
+            gender: data.gender,
+          },
+        });
+        router.push("/");
+      } else {
+        setError("email", {
+          message: "Provided email is not valid",
+        });
+        console.log(`Email ${data?.email} does not exist.`);
+      }
+    } catch (error) {}
+
+    // Redirect to login page after successful signup
   }
 
   return (
@@ -60,7 +129,9 @@ export default function SignupForm() {
 
             {/* Form Body */}
             <div className="rounded-tr-4xl bg-white px-10 pb-8 pt-4">
-              <h1 className="text-2xl font-semibold text-gray-900">Create your account</h1>
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Create your account
+              </h1>
               <form
                 className="mt-12"
                 action=""
@@ -70,30 +141,41 @@ export default function SignupForm() {
               >
                 {/* Name Input */}
                 <div className="relative">
-                  <input
-                    {...register("name")}
-                    id="name"
-                    name="name"
-                    type="text"
-                    className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
-                    placeholder="John Doe"
-                    autoComplete="off"
-                  />
-                  {errors?.name && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.name?.message}
-                    </p>
-                  )}
                   <label
-                    htmlFor="name"
+                    htmlFor="fullname"
                     className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
                   >
                     Full Name
                   </label>
+                  <input
+                    {...register("fullname")}
+                    id="fullname"
+                    name="fullname"
+                    type="text"
+                    className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
+                    placeholder="John Doe"
+                    autoComplete="off"
+                    onBlur={() => {
+                      trigger("fullname");
+                    }}
+                  />
+                  <ErrorMessage
+                    errors={errors}
+                    name="fullname"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Email Input */}
                 <div className="relative mt-4">
+                  <label
+                    htmlFor="email"
+                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+                  >
+                    Email address
+                  </label>
                   <input
                     {...register("email", { required: true })}
                     id="email"
@@ -102,22 +184,27 @@ export default function SignupForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="john@doe.com"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("email");
+                    }}
                   />
-                  {errors?.email && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.email?.message}
-                    </p>
-                  )}
-                  <label
-                    htmlFor="email"
-                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
-                  >
-                    Email address
-                  </label>
+                  <ErrorMessage
+                    errors={errors}
+                    name="email"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Password Input */}
                 <div className="relative mt-4">
+                  <label
+                    htmlFor="password"
+                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+                  >
+                    Password
+                  </label>
                   <input
                     {...register("password", { required: true })}
                     id="password"
@@ -126,22 +213,27 @@ export default function SignupForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="Password"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("password");
+                    }}
                   />
-                  {errors?.password && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.password?.message}
-                    </p>
-                  )}
-                  <label
-                    htmlFor="password"
-                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
-                  >
-                    Password
-                  </label>
+                  <ErrorMessage
+                    errors={errors}
+                    name="password"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Username Input */}
                 <div className="relative mt-4">
+                  <label
+                    htmlFor="username"
+                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+                  >
+                    Username
+                  </label>
                   <input
                     {...register("username", { required: true })}
                     id="username"
@@ -150,27 +242,35 @@ export default function SignupForm() {
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
                     placeholder="johndoe123"
                     autoComplete="off"
+                    onBlur={() => {
+                      trigger("username");
+                    }}
                   />
-                  {errors?.username && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.username?.message}
-                    </p>
-                  )}
-                  <label
-                    htmlFor="username"
-                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
-                  >
-                    Username
-                  </label>
+                  <ErrorMessage
+                    errors={errors}
+                    name="username"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Gender Input */}
                 <div className="relative mt-4">
+                  <label
+                    htmlFor="gender"
+                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
+                  >
+                    Gender
+                  </label>
                   <select
                     {...register("gender", { required: true })}
                     id="gender"
                     name="gender"
                     className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 placeholder-transparent focus:border-rose-600 focus:outline-none"
+                    onBlur={() => {
+                      trigger("gender");
+                    }}
                   >
                     <option value="" disabled>
                       Select gender
@@ -179,17 +279,13 @@ export default function SignupForm() {
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
                   </select>
-                  {errors?.gender && (
-                    <p className="text-red-600 text-sm">
-                      {errors?.gender?.message}
-                    </p>
-                  )}
-                  <label
-                    htmlFor="gender"
-                    className="absolute -top-3.5 left-0 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
-                  >
-                    Gender
-                  </label>
+                  <ErrorMessage
+                    errors={errors}
+                    name="gender"
+                    render={({ message }) => (
+                      <p className="text-red-500">{message}</p>
+                    )}
+                  />
                 </div>
 
                 {/* Submit Button */}
@@ -204,11 +300,17 @@ export default function SignupForm() {
                       <svg
                         aria-hidden="true"
                         className="inline w-6 h-6 mr-2 text-white animate-spin fill-rose-600 opacity-100"
-                        viewBox="0 0 100 101"
-                        fill="none"
                         xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24" // Adjust the viewBox as needed
                       >
-                        {/* SVG for Spinner Animation */}
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
                       </svg>
                     </div>
                   ) : (
