@@ -6,7 +6,7 @@ import { useCartState } from "../app/store/cart";
 import { useRouter } from "next/router";
 import { useApolloClient } from "@apollo/client";
 import { Loader } from "../app/components/Loader";
-import { isAuthenticated } from "utils";
+import { isAuthenticated } from "../app/store/utils";
 import HeaderDropdown from "../app/components/HeaderDropdown";
 
 export default function Products() {

@@ -5,7 +5,13 @@ import { MockedProvider } from "@apollo/client/testing";
 
 // Mock useRouter from next/router
 jest.mock("next/router", () => ({
-  useRouter: jest.fn(),
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
+jest.mock("../store/utils", () => ({
+  isAuthenticated: jest.fn(),
 }));
 
 describe("LoginForm", () => {

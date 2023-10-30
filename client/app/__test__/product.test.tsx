@@ -4,7 +4,13 @@ import Products from "../../pages/products";
 
 // Create a mock of the useRouter function
 jest.mock("next/router", () => ({
-  useRouter: jest.fn(),
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
+jest.mock("../store/utils", () => ({
+  isAuthenticated: jest.fn(),
 }));
 
 const resetStore = jest.fn();
