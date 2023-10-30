@@ -6,7 +6,7 @@ import HeaderDropdown from "../../app/components/HeaderDropdown";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { Loader } from "../../app/components/Loader";
-import { isAuthenticated } from "../../utils";
+import { isAuthenticated } from "../../app/store/utils";
 import Link from "next/link";
 
 const MY_ORDERS = gql`

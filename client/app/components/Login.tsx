@@ -8,7 +8,7 @@ import Link from "next/link";
 import { gql, useMutation } from "@apollo/client";
 import { useEffect } from "react";
 import { ErrorMessage } from "@hookform/error-message";
-import { isAuthenticated } from "utils";
+import { isAuthenticated } from "../store/utils";
 import { Loader } from "./Loader";
 
 const MAIL_CHECK_API_TOKEN = "fdec26ce0541b04b13bc2166820656b0";
